@@ -5,9 +5,10 @@ const Todo = require('../models/todo')
 const auth = require('./auth')
 
 // Getting all Todos
-router.get('/', async (req,res) => {
+router.get('/', [auth.authenticateToken,auth.verifyAdmin], async (req,res) => {
     try {
         const todos = await Todo.find()
+        todos.filter(todo => todo.username === req.user.username)
         res.json(todos)
     } catch (err) {
         res.status(500).json({message: err.message})
@@ -20,10 +21,12 @@ router.get('/:id', getTodo, (req,res) => {
 })
 
 // Creating one Todo
-router.post('/', auth.verifyAdmin, async (req,res) => {
+router.post('/', auth.authenticateToken, async (req,res) => {
+    console.log(req.user)
     const todo = new Todo({
         name: req.body.name,
         description: req.body.description,
+        username: req.user.username
     })
     try{
         const newTodo = await todo.save()

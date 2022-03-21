@@ -22,6 +22,6 @@ const authRouter = require('./routes/auth')
 
 app.use('/subscribers',subscribersRouter)
 app.use('/todos',todosRouter)
-app.use('/auth',authRouter)
+app.use('/auth',authRouter.router)
 
 app.listen(3000, () => console.log('Server Started'))

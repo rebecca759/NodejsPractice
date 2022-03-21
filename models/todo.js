@@ -14,9 +14,9 @@ const todoSchema = new mongoose.Schema({
         required: true,
         default: false
     },
-    user: {
+    username: {
         type: String,
-        required: true
+        required: false
     }
 })
 

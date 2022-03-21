@@ -78,8 +78,8 @@ router.post('/login', async (req,res) => {
     try {
         if (await bcrypt.compare(req.body.password,user.password)) {
             console.log('Success')
-            jwt.sign({username:user.username}, process.env.ACCESS_TOKEN_SECRET)
-            const accessToken = jwt.sign({username:user.username},process.env.ACCESS_TOKEN_SECRET)
+            jwt.sign({username:user.username,password:user.password,role:user.role}, process.env.ACCESS_TOKEN_SECRET)
+            const accessToken = jwt.sign({username:user.username,password:user.password,role:user.role},process.env.ACCESS_TOKEN_SECRET)
             return res.status(200).json({ message: 'Success', accessToken: accessToken })
         } else { 
             return res.status(400).json({ message: 'Wrong credentials'})
@@ -115,8 +115,27 @@ async function setUser(req,res,next) {
             user = userFound;
         });
         req.user = user
+        console.log('in set user',req.user)
     }
     next()
 }
 
-module.exports = router
+function authenticateToken(req,res,next) {
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) return res.sendStatus(401)
+    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,user)=>{
+        if (err) return res.sendStatus(403)
+        console.log(req.user,user)
+        req.user = user
+        console.log('passed authenticate token')
+        next()
+    })   
+}
+
+
+module.exports = {
+    router,
+    verifyAdmin,
+    authenticateToken
+}
